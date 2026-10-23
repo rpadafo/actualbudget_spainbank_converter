@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import unicodedata
+from decimal import Decimal, InvalidOperation
 
 import pdfplumber
 
@@ -26,6 +27,19 @@ def _normalize_header(value):
         character for character in unicodedata.normalize('NFKD', text)
         if not unicodedata.combining(character)
     )
+
+
+def _normalize_amount(value):
+    amount = value.replace('€', '').replace(' ', '').replace('+', '')
+    try:
+        number = Decimal(amount.replace(',', '.'))
+    except InvalidOperation as error:
+        raise ValueError(f"[SumUp] Invalid transaction amount: {value!r}") from error
+
+    normalized = format(number, 'f')
+    if '.' in normalized:
+        normalized = normalized.rstrip('0').rstrip('.')
+    return normalized.replace('.', ',')
 
 
 def _extract_page_transactions_from_words(page):
@@ -131,9 +145,11 @@ def process(source_path, output_path, file_name):
     prefix = os.environ.get("PREFIX_SUMUP", "SUMUP")
     csv_path = os.path.join(output_path, f"{prefix}_{base_name}.csv")
 
-    with open(csv_path, 'w', encoding='utf-8', newline='') as csv_file:
+    with open(csv_path, 'w', encoding='utf-8-sig', newline='') as csv_file:
         writer = csv.writer(csv_file, delimiter=';')
         writer.writerow(HEADERS)
-        writer.writerows(transactions)
+        for transaction in transactions:
+            transaction[3] = _normalize_amount(transaction[3])
+            writer.writerow(transaction)
 
     logger.info(f"[SumUp] CSV successfully saved to: {csv_path}")
