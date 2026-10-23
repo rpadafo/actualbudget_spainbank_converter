@@ -11,6 +11,7 @@ import sabadell
 import caixa
 import santander
 import traderepublic
+import sumup
 
 IN_FOLDER = "/excel"
 OUT_FOLDER = "/csv"
@@ -57,32 +58,37 @@ class FilesMonitor(FileSystemEventHandler):
         file_name = os.path.basename(event.src_path)
         file_name_lower = file_name.lower()
 
-        if file_name_lower.endswith(('.xlsx', '.xls', '.txt', '.csv')):
+        if file_name_lower.endswith(('.xlsx', '.xls', '.txt', '.csv', '.pdf')):
             logger.info(f"⚡ Find: {file_name}")
             time.sleep(2) # Wait for complete copy
             
             try:
-                # 1. TRADE REPUBLIC
-                if file_name_lower == "exportación de transacción.csv":
+                # 1. SUMUP
+                if file_name_lower.startswith("sumup") and file_name_lower.endswith(".pdf"):
+                    logger.info("-> Using [SumUp] module")
+                    sumup.process(event.src_path, OUT_FOLDER, file_name)
+
+                # 2. TRADE REPUBLIC
+                elif file_name_lower == "exportación de transacción.csv":
                     logger.info("-> Using [Trade Republic] module")
                     traderepublic.process(event.src_path, OUT_FOLDER, file_name)
 
-                # 2. SANTANDER (Files starts with transactions)
+                # 3. SANTANDER (Files starts with transactions)
                 elif file_name_lower.startswith("transactions"):
                     logger.info("-> Using [Santander] module")
                     santander.process(event.src_path,OUT_FOLDER,file_name)
 
-                # 3. LA CAIXA
+                # 4. LA CAIXA
                 elif file_name_lower.startswith("movimientos_cuenta"):
                     logger.info("-> Using [Caixa] module")
                     caixa.process(event.src_path,OUT_FOLDER,file_name)
 
-                # 4. BANKINTER
+                # 5. BANKINTER
                 elif file_name_lower.startswith("movimientos"):
                     logger.info("-> Using [Bankinter] module")
                     bankinter.process(event.src_path,OUT_FOLDER,file_name)
 
-                # 5. CASO SABADELL
+                # 6. CASO SABADELL
                 elif file_name_lower.endswith('.txt') or re.match(r'^[\d_]+\.[a-zA-Z0-9]+$', file_name_lower):
                     logger.info("-> Using [Sabadell] module")
                     sabadell.process(event.src_path, OUT_FOLDER, file_name)
