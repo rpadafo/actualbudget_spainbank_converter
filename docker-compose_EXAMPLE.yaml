@@ -1,22 +1,32 @@
 services:
-  bank_documents_to_csv:
-    image: ghcr.io/rpadafo/bank_documents_to_csv:latest
-    container_name: bankdocumentstocsv
+  actualbudget_spainbank_converter:
+    image: ghcr.io/rpadafo/actualbudget_spainbank_converter:latest
+    container_name: actualbudget-spainbank-converter
     restart: unless-stopped
     environment:
-      - RETENTION_HOUR=12
-      #optional >>
+      - RETENTION_HOUR=12 # Retention time in hours before auto-deleting CSV files
       - PREFIX_BANKINTER=BANK
       - PREFIX_CAIXA=CAIX
       - PREFIX_SABADELL=SABA
       - PREFIX_SANTANDER=SANT
       - PREFIX_TRADEREPUBLIC=TR
+      - PREFIX_SUMUP=SUM
     deploy:
-        resources:
-            limits:
-                cpus: '1'
-                memory: 100M
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 100M
     volumes:
-      # Two folders required, excel and CSV >>
-      - ./excel:/excel
-      - ./csv:/csv
+      - /path/to/your/input:/input
+      - /path/to/your/output:/output
+#Optional >>
+    networks:
+        lan:
+            ipv4_address: 192.168.x.x
+            mac_address: "02:42:C0:xx:xx:xx"
+    dns:
+            - 8.8.8.8
+networks:
+    lan:
+        external: true
+#Optional <<<

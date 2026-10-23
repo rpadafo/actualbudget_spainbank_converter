@@ -1,4 +1,4 @@
-# Bank Documents to CSV
+# Actual Budget: Spain Bank Converter CSV
 
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
@@ -12,13 +12,13 @@ Automated background service to convert Excel, TXT, and PDF statements from Span
 > **Prerequisites:**
 > * An instance of **Actual Budget** running.
 > * **Docker** and **Docker Compose** installed.
-> * Dedicated host folders for `/excel` (input) and `/csv` (output).
+> * Dedicated host folders for `/input` (source documents) and `/output` (generated CSV files).
 
 ---
 
 ## 🚀 Features
 
-* **Automated Processing:** Monitors the `/excel` directory and converts files in real time.
+* **Automated Processing:** Monitors the `/input` directory and converts files in real time.
 * **Smart Bank Detection:** Automatically routes files to the correct processor based on file names and structures.
 * **Auto-Cleanup:** Deletes processed source files and automatically removes old CSVs after a configurable retention period.
 * **Spanish Formatting Ready:** Properly formats dates, numbers (commas for decimals), and UTF-8 encoding.
@@ -32,7 +32,7 @@ Automated background service to convert Excel, TXT, and PDF statements from Span
 | **Banco Santander** | `.xlsx` / `.xls` | `SA_*.csv` |
 | **Banco Sabadell** | `.txt` | `BS_*.csv` |
 | **Trade Republic** | `Exportación de transacción.csv` | `TR_*.csv` |
-| **SumUp** | `SumUp*.pdf` | `SUMUP_*.csv` |
+| **SumUp** | `SumUp*.pdf` | `SUM_*.csv` |
 
 ---
 
@@ -42,27 +42,27 @@ Use the following `docker-compose.yml` snippet to deploy the container:
 
 ```yaml
 services:
-  bank_documents_to_csv:
-    image: ghcr.io/rpadafo/bank_documents_to_csv:latest
-    container_name: bankdocumentstocsv
+  actualbudget_spainbank_converter:
+    image: ghcr.io/rpadafo/actualbudget_spainbank_converter:latest
+    container_name: actualbudget-spainbank-converter
     restart: unless-stopped
     environment:
-      - HORAS_RETENCION=12 # Retention time in hours before auto-deleting CSV files
+      - RETENTION_HOUR=12 # Retention time in hours before auto-deleting CSV files
       - PREFIX_BANKINTER=BANK
       - PREFIX_CAIXA=CAIX
       - PREFIX_SABADELL=SABA
       - PREFIX_SANTANDER=SANT
       - PREFIX_TRADEREPUBLIC=TR
-      - PREFIX_SUMUP=SUMUP
+      - PREFIX_SUMUP=SUM
     deploy:
       resources:
         limits:
           cpus: '0.5'
           memory: 100M
     volumes:
-      - /path/to/your/excel:/excel
-      - /path/to/your/csv:/csv
-    #Optional >>
+      - /path/to/your/input:/input
+      - /path/to/your/output:/output
+#Optional >>
     networks:
         lan:
             ipv4_address: 192.168.x.x

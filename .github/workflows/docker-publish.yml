@@ -30,5 +30,5 @@ jobs:
           push: true
           # Aquí creamos las dos etiquetas a la vez:
           tags: |
-            ghcr.io/${{ github.actor }}/bank_documents_to_csv:latest
-            ghcr.io/${{ github.actor }}/bank_documents_to_csv:v26.0.${{ github.run_number }}
+            ghcr.io/${{ github.actor }}/actualbudget_spainbank_converter:latest
+            ghcr.io/${{ github.actor }}/actualbudget_spainbank_converter:v27.0.${{ github.run_number }}
