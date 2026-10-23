@@ -13,8 +13,8 @@ import santander
 import traderepublic
 import sumup
 
-IN_FOLDER = "/excel"
-OUT_FOLDER = "/csv"
+IN_FOLDER = "/input"
+OUT_FOLDER = "/output"
 RETENTION_HOUR = int(os.environ.get("RETENTION_HOUR", 12))
 
 logging.basicConfig(
@@ -97,7 +97,7 @@ class FilesMonitor(FileSystemEventHandler):
                     logger.info(f"{ERROR_RED}❌ This file is not asociated to any bank: {file_name}{RESET_COLOR}")
                     return
 
-                # Delete the original file from /excel
+                # Delete the original file from /input
                 os.remove(event.src_path)
 
             except Exception as e:
